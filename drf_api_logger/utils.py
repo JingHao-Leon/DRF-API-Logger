@@ -50,8 +50,12 @@ def _is_sensitive_key(key, extra_sensitive_keys=None):
     A key is sensitive when it matches one of the configured sensitive keys
     exactly, or when it ends with one of them. The suffix rule keeps compound
     credential names such as ``access_token``, ``refresh_token`` and
-    ``user_password`` masked, which is how the sensitive key list behaved
-    before the matcher was reduced to exact matches only.
+    ``user_password`` masked.
+
+    The query-string branch of ``mask_sensitive_data`` used to mask every
+    occurrence of a sensitive key in the URL, so ``access_token=`` was
+    filtered there; the exact-match matcher that later replaced it does not
+    cover compound names.
     """
     normalized = _normalize_sensitive_key(key)
     sensitive_keys = _get_sensitive_keys(extra_sensitive_keys)
