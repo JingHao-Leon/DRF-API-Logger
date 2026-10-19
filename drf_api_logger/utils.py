@@ -44,7 +44,23 @@ def _get_sensitive_keys(extra_sensitive_keys=None):
 
 
 def _is_sensitive_key(key, extra_sensitive_keys=None):
-    return _normalize_sensitive_key(key) in _get_sensitive_keys(extra_sensitive_keys)
+    """
+    Check whether a key names a sensitive value.
+
+    A key is sensitive when it matches one of the configured sensitive keys
+    exactly, or when it ends with one of them. The suffix rule keeps compound
+    credential names such as ``access_token``, ``refresh_token`` and
+    ``user_password`` masked, which is how the sensitive key list behaved
+    before the matcher was reduced to exact matches only.
+    """
+    normalized = _normalize_sensitive_key(key)
+    sensitive_keys = _get_sensitive_keys(extra_sensitive_keys)
+    if normalized in sensitive_keys:
+        return True
+    return any(
+        sensitive_key and normalized.endswith(sensitive_key)
+        for sensitive_key in sensitive_keys
+    )
 
 
 def get_headers(request=None):
